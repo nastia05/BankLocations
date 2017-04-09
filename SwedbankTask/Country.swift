@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum Country: String {
+enum Country {
 	
 	case ee, lt, lv
 	
@@ -18,6 +18,10 @@ enum Country: String {
 		case .lv: return NSLocalizedString("Latvia", comment: "Latvia")
 		case .lt: return NSLocalizedString("Lithuania", comment: "Lithuania")
 		}
+	}
+	
+	static var all: [Country] {
+		return [.ee, .lt, .lv]
 	}
 	
 }
