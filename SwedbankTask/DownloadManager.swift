@@ -1,5 +1,5 @@
 //
-//  Request.swift
+//  DownloadManager.swift
 //  SwedbankTask
 //
 //  Created by nastia on 06/04/2017.
@@ -8,12 +8,11 @@
 
 import Foundation
 
-typealias SingleSuccessHandler = (Data) -> Void
-typealias SingleErrorHandler = (Error) -> Void
-let ConsoleErrorHandler: SingleErrorHandler = { print($0) }
+typealias SuccessHandler = (Data) -> Void
+typealias ErrorHandler = (Error) -> Void
+typealias FieldsDictionary = [CountryIdentifier : [PlaceFields]]
 
-
-extension Country {
+extension CountryIdentifier {
 
 	private var requestSring: String {
 		switch self {
@@ -29,24 +28,68 @@ extension Country {
 	}
 }
 
-
+//Get data from backend for each, parse it, and pass to the BankModelUpdateManager object
 final class DownloadManager {
 	
 	fileprivate static let cookieName = "Swedbank-Embedded"
 	fileprivate static let cookieValue = "iphone-app"
 	
-	func downloadInformationFor(country: Country, singleCompletionHandler sch: @escaping SingleSuccessHandler, singleErrorHandler seh: @escaping SingleErrorHandler) {
+	private let updateManager = BankModelUpdateManager()
+	
+	func updateBankModel(completionHandler: @escaping (Void) -> Void, errorsHandler: @escaping ([Error]) -> Void) {
+		
+		let group = DispatchGroup()
+		var errors = [Error]()
+		
+		var countriesPlacesFields = FieldsDictionary()
+		
+		for countryId in CountryIdentifier.all {
+			group.enter()
+			
+			let groupErrorHandler: (Error) -> Void = {
+				errors.append($0)
+				group.leave()
+			}
+			
+			let downloadHandler: (Data) -> Void = {
+				guard let jsonObject = try? JSONSerialization.jsonObject(with: $0, options: .allowFragments), let json = jsonObject as? Array<Dictionary<String, Any>> else {
+					groupErrorHandler(UpdateError.parseError)
+					return
+				}
+				
+				let placeFieldsArray = json.flatMap { PlaceFields(json: $0) }
+				countriesPlacesFields[countryId] = placeFieldsArray
+				
+				group.leave()
+			}
+			
+			downloadDataFor(country: countryId, completionHandler: downloadHandler, errorHandler: groupErrorHandler)
+		}
+		
+		group.notify(queue: .main) { [weak self] in
+			//insert data into local storage
+			self?.updateManager.updateLocalCache(countriesPlacesFields, completionHandler: {
+				errors.isEmpty ? completionHandler() : errorsHandler(errors)
+			}, errorHandler: { err in
+				errors.append(err)
+				errorsHandler(errors)
+			})
+		}
+		
+	}
+	
+	private func downloadDataFor(country: CountryIdentifier, completionHandler ch: @escaping SuccessHandler, errorHandler eh: @escaping ErrorHandler) {
 		
 		setupCookies(forURL: country.request.url!)
 		
 		let task = URLSession.shared.dataTask(with: country.request, completionHandler: { (data, response, error) in
 			
 			guard error == nil else {
-				seh(error!)
+				eh(error!)
 				return
 			}
 			
-			sch(data!)
+			ch(data!)
 			
 		})
 		task.resume()

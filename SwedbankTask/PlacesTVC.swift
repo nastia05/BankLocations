@@ -7,89 +7,114 @@
 //
 
 import UIKit
+import CoreData
 
-final class PlacesTVC: UITableViewController {
+final class PlaceCell: UITableViewCell {
+	
+	@IBOutlet weak var nameLabel: UILabel!
+	@IBOutlet weak var addressLabel: UILabel!
+	@IBOutlet weak var circleView: CircleView!
+	@IBOutlet weak var placeLabel: UILabel!
+	
+	weak var place: Place! {
+		didSet {
+			nameLabel.text = place.name
+			addressLabel.text = place.address
+			placeLabel.text = PlaceFields.PlaceType(rawValue: place.type)?.text
+			circleView.color = PlaceFields.PlaceType(rawValue: place.type)?.color
+			circleView.setNeedsDisplay()
+		}
+	}
+}
 
+final class PlacesTVC: UITableViewController, ContextDelegate {
+
+	weak var region: Region!
+	var placesResultsController: NSFetchedResultsController<Place>!
+	
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
+		title = region.name
+		
+		setupFecthedController()
 
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem()
     }
+	
+	private func setupFecthedController() {
+		placesResultsController = NSFetchedResultsController(fetchRequest: Place.configuredFetchRequest(forRegion: region) , managedObjectContext: moc, sectionNameKeyPath: nil, cacheName: nil)
+		do {
+			try placesResultsController.performFetch()
+		} catch let error {
+			fatalError("Failed to initialize FetchedResultsController: \(error)")
+		}
+	}
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
+	override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+		if let dvc = segue.destination as? SinglePlaceVC {
+			let indexPath = tableView.indexPathForSelectedRow
+			let object = placesResultsController.object(at: indexPath!)
+			dvc.place = object
+		}
+	}
+	
     // MARK: - Table view data source
 
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
-        return 0
-    }
-
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        return 0
+		return placesResultsController.fetchedObjects?.count ?? 0
     }
 
-    /*
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
+		guard let cell = tableView.dequeueReusableCell(withIdentifier: "PlacesCellSID", for: indexPath) as? PlaceCell else {
+			fatalError("Wrong cell type")
+		}
 
-        // Configure the cell...
-
+        cell.place = placesResultsController.object(at: indexPath)
         return cell
     }
-    */
+	
+	override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+		return 64
+	}
 
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
-        return true
-    }
-    */
+}
 
-    /*
-    // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
-    }
-    */
+class CircleView: UIView {
+	var color: UIColor?
+	
+	override func draw(_ rect: CGRect) {
+		let path = UIBezierPath(ovalIn: bounds)
+		(color?.withAlphaComponent(0.5) ?? UIColor.lightGray).setFill()
+		path.fill()
+	}
+}
 
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
+private extension PlaceFields.PlaceType {
+	
+	var color: UIColor {
+		switch self {
+		case .branch: return .blue
+		case .atm: return .orange
+		case .nba: return .green
+		}
+	}
+	
+	var text: String {
+		switch self {
+		case .branch: return "BR"
+		case .atm: return "A"
+		case .nba: return "B"
+		}
+	}
+}
 
-    }
-    */
+extension Place {
 
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
+	static func configuredFetchRequest(forRegion region: Region) -> NSFetchRequest<Place> {
+		let request: NSFetchRequest<Place> = Place.fetchRequest()
+		let predicate = NSPredicate(format: "region = %@", region)
+		request.predicate = predicate
+		request.sortDescriptors = [NSSortDescriptor(key: #keyPath(Place.type), ascending: true), NSSortDescriptor(key: #keyPath(Place.name), ascending: true, selector: #selector(NSString.caseInsensitiveCompare(_:)))]
+		return request
+	}
 }

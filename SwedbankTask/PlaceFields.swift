@@ -1,5 +1,5 @@
 //
-//  Location.swift
+//  PlaceFields.swift
 //  SwedbankTask
 //
 //  Created by nastia on 06/04/2017.
@@ -21,8 +21,7 @@ enum SerialisationKey: String {
 	case coinStation = "cs"
 }
 
-//TODO: - support NSCoding
-final class Place {
+struct PlaceFields {
 	
 	let name: String
 	let address: String
@@ -31,8 +30,16 @@ final class Place {
 	let availability: String?
 	var branchInfo: BranchInfo? //applicable for branches only
 	
-	enum PlaceType: Int {
+	enum PlaceType: Int16 {
 		case branch, atm, nba
+		
+		var description: String {
+			switch self {
+			case .branch: return "Branch"
+			case .atm: return "ATM"
+			case .nba: return "BNA"
+			}
+		}
 	}
 
 	struct BranchInfo {
@@ -58,7 +65,7 @@ final class Place {
 	
 	init?(json: [String : Any]) {
 		guard let address = json.string(forKey: .address),
-		let typeRaw = json.integer(forKey: .type),
+		let typeRaw = json.integer16(forKey: .type),
 		let type = PlaceType(rawValue: typeRaw),
 		let name = json.string(forKey: .name),
 		let region = json.string(forKey: .region) else {
@@ -87,19 +94,9 @@ extension Dictionary where Key == String, Value == Any {
 		return self[key.rawValue] as? String
 	}
 	
-	func integer(forKey key: SerialisationKey) -> Int? {
-		return self[key.rawValue] as? Int
+	func integer16(forKey key: SerialisationKey) -> Int16? {
+		return self[key.rawValue] as? Int16
 	}
 	
 }
 
-
-
-//a = "ENDLA 45, 10615 TALLINN";
-//av = "E-R 10.00-19.00; L 10.00-16.00";
-//lat = "59.42706667";
-//lon = "24.72249167";
-//n = "KRISTIINE KK";
-//ncash = 1;
-//r = "Kristiine linnaosa";
-//t = 0;
