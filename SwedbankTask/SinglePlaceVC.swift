@@ -20,13 +20,15 @@ final class SinglePlaceVC: UITableViewController, ContextDelegate {
 	@IBOutlet weak var availabilityLabel: UILabel!
 	@IBOutlet weak var infoLabel: UILabel!
 	
+	@IBOutlet var availabilityContraints: [NSLayoutConstraint]!
+	@IBOutlet var infoConstraints: [NSLayoutConstraint]!
+	
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		
 		title = place.name
 		
 		tableView.estimatedRowHeight = cellHeight
-//		tableView.rowHeight = UITableViewAutomaticDimension
 		
 		configureLabels()
 		
@@ -45,12 +47,15 @@ final class SinglePlaceVC: UITableViewController, ContextDelegate {
 	
 
 	override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-		
 		if indexPath == IndexPath(row: 0, section: 1) && place.availability == nil {
+			availabilityContraints.forEach { $0.isActive = false }
 			return 0
 		} else if indexPath == IndexPath(row: 1, section: 1) && place.branchInfo == nil {
+			infoConstraints.forEach { $0.isActive = false }
 			return 0
 		} else {
+			availabilityContraints.forEach { $0.isActive = true }
+			infoConstraints.forEach { $0.isActive = true }
 			return UITableViewAutomaticDimension
 		}
 	}

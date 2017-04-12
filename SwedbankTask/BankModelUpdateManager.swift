@@ -77,7 +77,6 @@ final class BankModelUpdateManager: ContextDelegate {
 			
 			//updates places
 			try Place.update(with: placeFields, forCountry: countryId, forRegions: regionsToUpdate, context: context)
-			
 		}
 		
 	}

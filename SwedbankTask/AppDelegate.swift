@@ -31,7 +31,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 protocol ContextDelegate {
 	var moc: NSManagedObjectContext { get }
-	var persistenceContainer: NSPersistentContainer { get }
 }
 
 extension ContextDelegate {
@@ -40,11 +39,6 @@ extension ContextDelegate {
 		assert(Thread.isMainThread)
 		let appDelegate = UIApplication.shared.delegate as! AppDelegate
 		return appDelegate.bankDataController.moc
-	}
-	
-	var persistenceContainer: NSPersistentContainer {
-		let appDelegate = UIApplication.shared.delegate as! AppDelegate
-		return appDelegate.bankDataController.persistentContainer
 	}
 	
 }

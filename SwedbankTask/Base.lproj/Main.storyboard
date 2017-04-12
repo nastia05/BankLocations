@@ -328,6 +328,20 @@
                         <outlet property="infoLabel" destination="UJ5-yA-5XP" id="hmp-bF-Xn3"/>
                         <outlet property="regionLabel" destination="a4M-ht-cQI" id="Rmk-1e-fe8"/>
                         <outlet property="typeLabel" destination="VhQ-IA-0qN" id="Mm9-Be-8AM"/>
+                        <outletCollection property="availabilityContraints" destination="WV5-fd-Tww" collectionClass="NSMutableArray" id="OoM-bk-cLf"/>
+                        <outletCollection property="availabilityContraints" destination="07m-oe-9a0" collectionClass="NSMutableArray" id="VVb-BR-xSY"/>
+                        <outletCollection property="availabilityContraints" destination="xqd-c3-XO2" collectionClass="NSMutableArray" id="FTv-aB-JYR"/>
+                        <outletCollection property="availabilityContraints" destination="3St-jn-JLC" collectionClass="NSMutableArray" id="IyX-Vw-hMM"/>
+                        <outletCollection property="availabilityContraints" destination="CEt-aZ-rJQ" collectionClass="NSMutableArray" id="Znh-LU-xjG"/>
+                        <outletCollection property="availabilityContraints" destination="D6I-x2-tQv" collectionClass="NSMutableArray" id="mo0-He-fNB"/>
+                        <outletCollection property="availabilityContraints" destination="lbw-Xu-7fp" collectionClass="NSMutableArray" id="LrN-Qq-ID3"/>
+                        <outletCollection property="infoConstraints" destination="UoQ-3z-cmb" collectionClass="NSMutableArray" id="gGR-eu-zQJ"/>
+                        <outletCollection property="infoConstraints" destination="Qd8-ru-Cp2" collectionClass="NSMutableArray" id="0bP-sd-om6"/>
+                        <outletCollection property="infoConstraints" destination="o4I-Zn-Y1F" collectionClass="NSMutableArray" id="2c8-qJ-c7v"/>
+                        <outletCollection property="infoConstraints" destination="1XQ-iV-oKT" collectionClass="NSMutableArray" id="s0k-UO-9Se"/>
+                        <outletCollection property="infoConstraints" destination="9DN-8B-wrn" collectionClass="NSMutableArray" id="0Cm-yE-izX"/>
+                        <outletCollection property="infoConstraints" destination="HsI-Oc-Rce" collectionClass="NSMutableArray" id="Hfr-G1-p2b"/>
+                        <outletCollection property="infoConstraints" destination="kl7-Xy-5Gh" collectionClass="NSMutableArray" id="KjM-ZP-ZuW"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="mqV-fX-hjF" userLabel="First Responder" sceneMemberID="firstResponder"/>
